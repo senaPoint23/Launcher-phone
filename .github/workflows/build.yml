@@ -16,11 +16,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
+      - name: Ekstrak zip
+        run: |
+          for z in $(find . -name "*.zip" -not -path "./.git/*"); do
+            unzip -o "$z" -d "$(dirname "$z")"
+          done
       - name: Build
         run: |
-          DIR=$(dirname "$(find . -name settings.gradle.kts | head -1)")
-          echo "Project di: $DIR"
-          gradle -p "$DIR" :app:assembleDebug
+          F=$(find . -name settings.gradle.kts | head -1)
+          if [ -z "$F" ]; then echo "settings.gradle.kts tidak ada di repo"; exit 1; fi
+          gradle -p "$(dirname "$F")" :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: AquaLauncher-debug
